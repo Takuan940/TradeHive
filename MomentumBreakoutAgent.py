@@ -1,6 +1,3 @@
-import numpy as np
-import pandas as pd
-
 
 class MomentumBreakoutAgent:
     def __init__(self,
@@ -41,22 +38,16 @@ class MomentumBreakoutAgent:
 
         try:
             # 🎯 Extract latest values
+            last_low_5m = df_5min['low'].iloc[-1]
             last_close_5m = df_5min['close'].iloc[-1]
             last_high_5m = df_5min['high'].iloc[-1]
-            last_low_5m = df_5min['low'].iloc[-1]
             last_atr_5m = df_5min['ATR_14'].iloc[-1]
             last_volume_5m = df_5min['volume'].iloc[-1]
             last_adx_15m = df_15min['ADX_14'].iloc[-1]
-
             ema_20_15m = df_15min['EMA_20'].iloc[-1]
             ema_50_15m = df_15min['EMA_50'].iloc[-1]
-
-            # 📊 Sicherstellen, dass genug Daten für Breakout-Zonen vorhanden sind
-            if len(df_5min) < self.breakout_window + 2:
-                return "HOLD", None, None
-
-            breakout_high = df_5min['high'].rolling(self.breakout_window).max().iloc[-2]
-            breakout_low = df_5min['low'].rolling(self.breakout_window).min().iloc[-2]
+            breakout_high = df_5min['high'].rolling(self.breakout_window).max().iloc[-1]
+            breakout_low = df_5min['low'].rolling(self.breakout_window).min().iloc[-1]
 
             # ✅ Trendbestätigung (15-Min-Chart)
             trend_long = ema_20_15m > ema_50_15m if self.ema_trend_filter else True
@@ -67,10 +58,8 @@ class MomentumBreakoutAgent:
             valid_adx = last_adx_15m >= self.min_adx_15m
             body_size_5m = abs(last_close_5m - df_5min['open'].iloc[-1])
             candle_size_5m = abs(last_high_5m - last_low_5m)
-            valid_candle_body = (
-                                        body_size_5m / candle_size_5m) >= self.min_candle_body_ratio if candle_size_5m != 0 else False
-            valid_volume = last_volume_5m > df_5min['volume'].rolling(self.breakout_window).mean().iloc[
-                -1] if self.volume_confirmation else True
+            valid_candle_body = (body_size_5m / candle_size_5m) >= self.min_candle_body_ratio if candle_size_5m != 0 else False
+            valid_volume = last_volume_5m > df_5min['volume'].rolling(self.breakout_window).mean().iloc[-1] if self.volume_confirmation else True
 
             # 📌 Korrektur der Slippage in Stop-Loss und Take-Profit Berechnung
             entry_price_long = last_close_5m + self.slippage_adjustment
