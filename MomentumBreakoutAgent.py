@@ -1,3 +1,4 @@
+import pandas as pd
 
 class MomentumBreakoutAgent:
     def __init__(self,
@@ -30,10 +31,7 @@ class MomentumBreakoutAgent:
         Determines a trading signal based on the provided 5min and 15min market data.
         """
         # Prüfen, ob genügend Daten vorhanden sind
-        if df_5min is None or df_15min is None or df_5min.empty or df_15min.empty:
-            return "HOLD", None, None
-
-        if len(df_5min) < self.breakout_window + 2 or len(df_15min) < 50:
+        if df_5min is None or df_15min is None or df_5min.empty or df_15min.empty or len(df_5min) < self.breakout_window + 2 or len(df_15min) < 50:
             return "HOLD", None, None
 
         try:
